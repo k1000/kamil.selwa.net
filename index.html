@@ -5,18 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kamil Selwa - Profile</title>
     <style>
+      .bg {
+        background-color: hsl(208.23deg 74.1% 5.95%);
+      }
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
         font-family: Helvetica, Arial, sans-serif;
-        background-color: hsl(208.23deg 74.1% 5.95%);
+
         color: white;
         font-size: 1.1rem;
       }
 
       a {
-        color: gray;
+        color: #fff6;
         text-decoration: none;
       }
       p {
@@ -62,8 +65,8 @@
   </head>
   <body>
     <div class="container">
-      <div class="image-section"></div>
-      <div class="info-section">
+      <div class="image-section bg"></div>
+      <div class="info-section bg">
         <div class="bio">
           <h1>Kamil Selwa</h1>
           <p>
@@ -92,4 +95,22 @@
       </div>
     </div>
   </body>
+  <script>
+    function randomColor() {
+      return `hsl(${Math.random() * 360}, 74.1%, 5.95%)`;
+    }
+    function changeBgColor() {
+      const backgroundColor = randomColor();
+      document.querySelectorAll('.bg').forEach((element) => {
+        element.style.backgroundColor = backgroundColor;
+      });
+    }
+    window.addEventListener('load', () => changeBgColor());
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const backgroundColor = randomColor();
+        changeBgColor();
+      }
+    });
+  </script>
 </html>

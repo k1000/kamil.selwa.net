@@ -96,22 +96,14 @@
     </div>
   </body>
   <script>
-    function randomColor() {
-      return `hsl(${Math.random() * 360}, 74.1%, 5.95%)`;
-    }
     function changeBgColor() {
-      const backgroundColor = randomColor();
+      const backgroundColor = `hsl(${Math.random() * 360}, 74.1%, 5.95%)`;
       document.querySelectorAll('.bg').forEach((element) => {
         element.style.backgroundColor = backgroundColor;
       });
     }
-    window.addEventListener('load', () => changeBgColor());
-    window.addEventListener('click', () => changeBgColor());
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        const backgroundColor = randomColor();
-        changeBgColor();
-      }
-    });
+
+    document.addEventListener('DOMContentLoaded', changeBgColor);
+    document.addEventListener('click', changeBgColor);
   </script>
 </html>

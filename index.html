@@ -97,7 +97,9 @@
   </body>
   <script>
     function changeBgColor() {
-      const backgroundColor = `hsl(${Math.random() * 360}, 74.1%, 5.95%)`;
+      const backgroundColor = `hsl(${Math.random() * 360}, 74.1%, ${
+        Math.random() * 10 + 5
+      }%)`;
       document.querySelectorAll('.bg').forEach((element) => {
         element.style.backgroundColor = backgroundColor;
       });

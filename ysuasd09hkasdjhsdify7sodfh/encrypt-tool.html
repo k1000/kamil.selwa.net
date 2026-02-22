@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Vault - Encrypt Tool</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { color: #00ff88; margin-bottom: 0.5rem; }
+    .subtitle { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
+    
+    .tabs-section { margin-bottom: 2rem; }
+    .tabs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .tabs-header h2 { font-size: 1.1rem; color: #00ff88; }
+    
+    .tab-item {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .tab-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #222;
+      cursor: pointer;
+    }
+    .tab-header:hover { background: #2a2a2a; }
+    .tab-name {
+      background: transparent;
+      border: none;
+      color: #00ff88;
+      font-size: 1rem;
+      font-weight: bold;
+      width: 200px;
+      outline: none;
+    }
+    .tab-name::placeholder { color: #666; }
+    .remove-tab {
+      background: #ff4444;
+      color: white;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .remove-tab:hover { background: #ff6666; }
+    .tab-content { padding: 1rem; }
+    .table-container {
+      overflow-x: auto;
+      margin-top: 1rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: #0f0f0f;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 0.5rem;
+      color: #e0e0e0;
+      min-width: 120px;
+      word-break: break-word;
+      vertical-align: top;
+    }
+    td[contenteditable="true"]:focus {
+      outline: 1px solid #00ff88;
+      background: #1a1a1a;
+    }
+    .tab-toolbar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .tab-toolbar button {
+      background: #333;
+      color: #e0e0e0;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .tab-toolbar button:hover { background: #444; }
+    
+    .add-tab {
+      background: #00ff88;
+      color: #0f0f0f;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .add-tab:hover { background: #00cc6a; }
+    
+    .passphrase-section {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .passphrase-section h2 { margin-bottom: 1rem; color: #00ff88; }
+    .passphrase-input {
+      width: 100%;
+      background: #0f0f0f;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      font-size: 1rem;
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    .passphrase-input:focus { outline: none; border-color: #00ff88; }
+    .passphrase-help { color: #666; font-size: 0.85rem; }
+    
+    .encrypt-btn {
+      background: #00ff88;
+      color: #0f0f0f;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: bold;
+      width: 100%;
+    }
+    .encrypt-btn:hover { background: #00cc6a; }
+    .encrypt-btn:disabled { background: #444; cursor: not-allowed; }
+    
+    .output-section {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: none;
+    }
+    .output-section.visible { display: block; }
+    .output-section h2 { margin-bottom: 1rem; color: #00ff88; }
+    .output-text {
+      width: 100%;
+      height: 120px;
+      background: #0f0f0f;
+      border: 1px solid #333;
+      color: #00ff88;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.8rem;
+      padding: 0.75rem;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+    .copy-btn {
+      background: #333;
+      color: #e0e0e0;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .copy-btn:hover { background: #444; }
+    .copy-btn.copied { background: #00ff88; color: #0f0f0f; }
+    
+    .error {
+      background: #ff4444;
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .error.visible { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 CSV Vault - Encrypt Tool</h1>
+    <p class="subtitle">Local encryption tool. No data leaves your browser.</p>
+    
+    <div class="error" id="error"></div>
+    
+    <div class="tabs-section">
+      <div class="tabs-header">
+        <h2>Data Tabs</h2>
+      </div>
+      <div id="tabs-container"></div>
+      <div><button class="add-tab" onclick="addTab()">+ Add Tab</button></div>
+    </div>
+    
+    <div class="passphrase-section">
+      <h2>🔑 Passphrase</h2>
+      <input type="password" class="passphrase-input" id="passphrase" placeholder="Enter a strong passphrase...">
+      <p class="passphrase-help">⚠️ Remember this passphrase! It cannot be recovered. Store it in a password manager.</p>
+    </div>
+    
+    <button class="encrypt-btn" onclick="encrypt()">Encrypt & Generate Payload</button>
+    
+    <div class="output-section" id="output">
+      <h2>📋 Encrypted Payload</h2>
+      <p style="color: #888; margin-bottom: 0.5rem; font-size: 0.85rem;">Copy this and paste it into the public page's ENCRYPTED_DATA variable.</p>
+      <textarea class="output-text" id="output-text" readonly></textarea>
+      <button class="copy-btn" onclick="copyOutput()">Copy to Clipboard</button>
+    </div>
+  </div>
+
+  <script>
+    let tabCount = 0;
+    
+    function parseCSV(text) {
+      if (!text) return [['', '', ''], ['', '', ''], ['', '', '']];
+      const rows = [];
+      let currentRow = [];
+      let currentCell = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (inQuotes) {
+          if (char === '"') {
+            if (i + 1 < text.length && text[i + 1] === '"') {
+              currentCell += '"';
+              i++;
+            } else {
+              inQuotes = false;
+            }
+          } else {
+            currentCell += char;
+          }
+        } else {
+          if (char === '"') {
+            inQuotes = true;
+          } else if (char === ',') {
+            currentRow.push(currentCell);
+            currentCell = '';
+          } else if (char === '\n' || char === '\r') {
+             if (char === '\r' && i + 1 < text.length && text[i + 1] === '\n') {
+              i++;
+            }
+            currentRow.push(currentCell);
+            rows.push(currentRow);
+            currentRow = [];
+            currentCell = '';
+          } else {
+            currentCell += char;
+          }
+        }
+      }
+      if (currentCell !== '' || currentRow.length > 0) {
+        currentRow.push(currentCell);
+        rows.push(currentRow);
+      }
+      return rows.length > 0 ? rows : [['', '', ''], ['', '', ''], ['', '', '']];
+    }
+
+    function unparseCSV(rows) {
+      return rows.map(row => 
+        row.map(cell => {
+          if (cell.includes(',') || cell.includes('"') || cell.includes('\n')) {
+            return '"' + cell.replace(/"/g, '""') + '"';
+          }
+          return cell;
+        }).join(',')
+      ).join('\n');
+    }
+
+    function renderTableFromCSV(tabId, dataStr) {
+      const rows = parseCSV(dataStr);
+      const table = document.getElementById(`${tabId}-table`);
+      let html = '<tbody>';
+      for (const row of rows) {
+        html += '<tr>';
+        for (const cell of row) {
+          const escaped = cell.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          html += `<td contenteditable="true">${escaped}</td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</tbody>';
+      table.innerHTML = html;
+    }
+
+    function importCSV(tabId, input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        renderTableFromCSV(tabId, e.target.result);
+      };
+      reader.readAsText(file);
+      input.value = ''; 
+    }
+
+    function addRow(tabId) {
+      const tbody = document.querySelector(`#${tabId}-table tbody`);
+      if (!tbody) return;
+      const tr = document.createElement('tr');
+      const colCount = tbody.rows.length > 0 ? tbody.rows[0].cells.length : 3;
+      for (let i = 0; i < colCount; i++) {
+        const td = document.createElement('td');
+        td.contentEditable = "true";
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+
+    function addColumn(tabId) {
+      const tbody = document.querySelector(`#${tabId}-table tbody`);
+      if (!tbody) return;
+      if (tbody.rows.length === 0) {
+        addRow(tabId);
+        return;
+      }
+      for (const row of tbody.rows) {
+        const td = document.createElement('td');
+        td.contentEditable = "true";
+        row.appendChild(td);
+      }
+    }
+    
+    function clearTable(tabId) {
+      renderTableFromCSV(tabId, '');
+    }
+
+    function addTab(name = '', data = '') {
+      tabCount++;
+      const container = document.getElementById('tabs-container');
+      const tabId = `tab-${tabCount}`;
+      
+      const div = document.createElement('div');
+      div.className = 'tab-item';
+      div.id = tabId;
+      div.innerHTML = `
+        <div class="tab-header" onclick="toggleTab('${tabId}')">
+          <input type="text" class="tab-name" placeholder="Tab name" value="${name}" onclick="event.stopPropagation()">
+          <button class="remove-tab" onclick="event.stopPropagation(); removeTab('${tabId}')">Remove</button>
+        </div>
+        <div class="tab-content" id="${tabId}-content">
+          <div class="tab-toolbar">
+            <input type="file" accept=".csv" onchange="importCSV('${tabId}', this)" style="display:none" id="${tabId}-file">
+            <button onclick="document.getElementById('${tabId}-file').click()">Import CSV</button>
+            <button onclick="addRow('${tabId}')">Add Row</button>
+            <button onclick="addColumn('${tabId}')">Add Column</button>
+            <button onclick="clearTable('${tabId}')" style="background: #522; margin-left: auto;">Clear</button>
+          </div>
+          <div class="table-container">
+            <table id="${tabId}-table"></table>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+      renderTableFromCSV(tabId, data);
+    }
+    
+    function toggleTab(id) {
+      const content = document.getElementById(`${id}-content`);
+      content.style.display = content.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function removeTab(id) {
+      document.getElementById(id).remove();
+    }
+    
+    addTab('Sheet1', '');
+    
+    async function encrypt() {
+      const errorEl = document.getElementById('error');
+      const passphrase = document.getElementById('passphrase').value;
+      const outputEl = document.getElementById('output');
+      const outputText = document.getElementById('output-text');
+      
+      errorEl.classList.remove('visible');
+      errorEl.textContent = '';
+      
+      if (!passphrase || passphrase.length < 8) {
+        errorEl.textContent = 'Passphrase must be at least 8 characters.';
+        errorEl.classList.add('visible');
+        return;
+      }
+      
+      const tabs = {};
+      const tabItems = document.querySelectorAll('.tab-item');
+      let hasData = false;
+      
+      tabItems.forEach(item => {
+        const nameInput = item.querySelector('.tab-name');
+        const name = nameInput.value.trim();
+        const table = item.querySelector('table');
+        
+        let isEmpty = true;
+        const rows = [];
+        if (table) {
+          table.querySelectorAll('tr').forEach(tr => {
+            const rowData = [];
+            tr.querySelectorAll('td').forEach(td => {
+              let cellVal = td.innerText || '';
+              cellVal = cellVal.replace(/\n$/, '');
+              if (cellVal.trim() !== '') {
+                isEmpty = false;
+              }
+              rowData.push(cellVal);
+            });
+            rows.push(rowData);
+          });
+        }
+        
+        if (name && !isEmpty) {
+          tabs[name] = unparseCSV(rows);
+          hasData = true;
+        }
+      });
+      
+      if (!hasData) {
+        errorEl.textContent = 'Please add at least one tab with data.';
+        errorEl.classList.add('visible');
+        return;
+      }
+      
+      try {
+        const jsonString = JSON.stringify(tabs);
+        const encoder = new TextEncoder();
+        const dataBuffer = encoder.encode(jsonString);
+        
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        
+        const keyMaterial = await crypto.subtle.importKey(
+          'raw',
+          encoder.encode(passphrase),
+          { name: 'PBKDF2' },
+          false,
+          ['deriveBits', 'deriveKey']
+        );
+        
+        const key = await crypto.subtle.deriveKey(
+          {
+            name: 'PBKDF2',
+            salt: salt,
+            iterations: 600000,
+            hash: 'SHA-256'
+          },
+          keyMaterial,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt']
+        );
+        
+        const encrypted = await crypto.subtle.encrypt(
+          { name: 'AES-GCM', iv: iv },
+          key,
+          dataBuffer
+        );
+        
+        const combined = new Uint8Array(16 + 12 + encrypted.byteLength);
+        combined.set(salt, 0);
+        combined.set(iv, 16);
+        combined.set(new Uint8Array(encrypted), 28);
+        
+        const base64 = btoa(String.fromCharCode(...combined));
+        
+        outputText.value = base64;
+        outputEl.classList.add('visible');
+        
+      } catch (err) {
+        errorEl.textContent = 'Encryption failed: ' + err.message;
+        errorEl.classList.add('visible');
+      }
+    }
+    
+    function copyOutput() {
+      const outputText = document.getElementById('output-text');
+      outputText.select();
+      document.execCommand('copy');
+      
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      
+      setTimeout(() => {
+        btn.textContent = 'Copy to Clipboard';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

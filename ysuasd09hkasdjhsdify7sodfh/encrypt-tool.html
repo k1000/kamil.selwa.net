@@ -336,6 +336,36 @@
       renderTableFromCSV(tabId, '');
     }
 
+    function exportCSV(tabId) {
+      const item = document.getElementById(tabId);
+      const nameInput = item.querySelector('.tab-name');
+      const name = nameInput.value.trim() || 'data';
+      const table = item.querySelector('table');
+      if (!table) return;
+
+      const rows = [];
+      table.querySelectorAll('tr').forEach(tr => {
+        const rowData = [];
+        tr.querySelectorAll('td').forEach(td => {
+          let cellVal = td.innerText || '';
+          cellVal = cellVal.replace(/\n$/, '');
+          rowData.push(cellVal);
+        });
+        rows.push(rowData);
+      });
+
+      const csvContent = unparseCSV(rows);
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
     function addTab(name = '', data = '') {
       tabCount++;
       const container = document.getElementById('tabs-container');
@@ -353,6 +383,7 @@
           <div class="tab-toolbar">
             <input type="file" accept=".csv" onchange="importCSV('${tabId}', this)" style="display:none" id="${tabId}-file">
             <button onclick="document.getElementById('${tabId}-file').click()">Import CSV</button>
+            <button onclick="exportCSV('${tabId}')">Export CSV</button>
             <button onclick="addRow('${tabId}')">Add Row</button>
             <button onclick="addColumn('${tabId}')">Add Column</button>
             <button onclick="clearTable('${tabId}')" style="background: #522; margin-left: auto;">Clear</button>
